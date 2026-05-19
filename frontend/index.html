@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise RAG Chat</title>
+    <meta name="description" content="Chat interface for the Enterprise RAG System">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>RAG System</h2>
+                <span class="badge">v1.0</span>
+            </div>
+            <div class="sidebar-content">
+                <div class="setting-group">
+                    <label for="top-k-slider">Context Chunks (Top K)</label>
+                    <div class="slider-container">
+                        <input type="range" id="top-k-slider" min="1" max="20" value="5">
+                        <span id="top-k-value">5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <div class="dot active"></div>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chat-container">
+            <header class="chat-header">
+                <h1>Knowledge Assistant</h1>
+                <p>Ask questions based on your ingested enterprise data.</p>
+            </header>
+
+            <div class="chat-history" id="chat-history">
+                <div class="message system-message">
+                    <div class="message-content">
+                        <p>Welcome! I'm your Enterprise RAG Assistant. Ask me anything about your documents.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <form id="chat-form" class="input-form">
+                    <textarea 
+                        id="user-input" 
+                        placeholder="Type your question here... (Shift+Enter for new line)" 
+                        rows="1"
+                        autofocus
+                    ></textarea>
+                    <button type="submit" id="send-btn" class="send-button" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
