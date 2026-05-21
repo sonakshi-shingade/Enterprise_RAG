@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Dict
+from Guardrails.input_guardrails import InputGuardrails
 
 from fastapi import (
     APIRouter,
@@ -15,7 +16,6 @@ from Utils.get_answer import (
     RAGPipelineError,
     RAGService,
 )
-
 
 # ---------------------------------------------------
 # Logging Configuration
@@ -41,9 +41,8 @@ get_answer_router = APIRouter(
 # Singleton RAG Service
 # ---------------------------------------------------
 # Avoid re-initializing models/services per request
-rag_service = RAGService(
-    collection_name="test_collection"
-)
+rag_service = RAGService(collection_name="test_collection")
+input_guardrail = InputGuardrails()
 
 
 # ---------------------------------------------------
@@ -95,9 +94,7 @@ async def health_check() -> Dict[str, str]:
     Health check endpoint.
     """
 
-    logger.info(
-        "Health check endpoint called."
-    )
+    logger.info("Health check endpoint called.")
 
     return {
         "status": "healthy",
@@ -126,26 +123,30 @@ async def get_answer_route(
     """
 
     try:
-        logger.info(
-            "Received query request."
-        )
+        logger.info("Received query request.")
 
         logger.info(
             "User Query: %s",
             query_payload.query,
         )
 
-        # ---------------------------------------------------
-        # Generate Answer
-        # ---------------------------------------------------
-        answer = await rag_service.get_answer(
-            query=query_payload.query,
-            top_k=query_payload.top_k,
+        input_query = query_payload.query
+        clean_query, guardrail_triggered = input_guardrail.run_input_guardrails(
+            input_query
         )
 
-        logger.info(
-            "Answer generated successfully."
-        )
+        answer = clean_query
+        if not guardrail_triggered:
+
+            # ---------------------------------------------------
+            # Generate Answer
+            # ---------------------------------------------------
+            answer = await rag_service.get_answer(
+                query=clean_query,
+                top_k=query_payload.top_k,
+            )
+
+        logger.info("Answer generated successfully.")
 
         return QueryResponse(
             success=True,
@@ -154,9 +155,7 @@ async def get_answer_route(
         )
 
     except RAGPipelineError as rag_error:
-        logger.exception(
-            "RAG pipeline error occurred."
-        )
+        logger.exception("RAG pipeline error occurred.")
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -167,16 +166,12 @@ async def get_answer_route(
         )
 
     except Exception as e:
-        logger.exception(
-            "Unexpected server error occurred."
-        )
+        logger.exception("Unexpected server error occurred.")
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
                 "success": False,
-                "message": (
-                    "Internal server error."
-                ),
+                "message": ("Internal server error."),
             },
         ) from e
