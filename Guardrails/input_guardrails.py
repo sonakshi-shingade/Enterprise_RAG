@@ -3,7 +3,6 @@ import re
 
 from Services.llm import LLMService
 
-
 # ---------------------------------------------------
 # Logging Configuration
 # ---------------------------------------------------
@@ -220,9 +219,7 @@ class InputGuardrails(LLMService):
                 email = match.group()
                 username, domain = email.split("@")
 
-                masked_username = (
-                    username[:2] + "*" * max(len(username) - 2, 0)
-                )
+                masked_username = username[:2] + "*" * max(len(username) - 2, 0)
 
                 return masked_username + "@" + domain
 
@@ -357,4 +354,3 @@ class InputGuardrails(LLMService):
                 "Error occurred while processing input safely.",
                 True,
             )
-
