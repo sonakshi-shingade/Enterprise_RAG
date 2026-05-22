@@ -10,6 +10,7 @@ This project is separated into a robust backend API and a lightweight frontend i
 - **Framework**: FastAPI (Python)
 - **Vector Database**: ChromaDB
 - **Embeddings**: SentenceTransformers (`paraphrase-MiniLM-L6-v2`)
+- **Semantic Caching**: ChromaDB answer cache for repeated or semantically similar queries
 - **LLM Provider**: OpenRouter (`meta-llama/llama-3.3-70b-instruct`)
 
 ### Frontend Stack
