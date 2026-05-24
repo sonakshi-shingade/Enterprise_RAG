@@ -12,6 +12,7 @@ This project is separated into a robust backend API and a lightweight frontend i
 - **Embeddings**: SentenceTransformers (`paraphrase-MiniLM-L6-v2`)
 - **Semantic Caching**: ChromaDB answer cache for repeated or semantically similar queries
 - **LLM Provider**: OpenRouter (`meta-llama/llama-3.3-70b-instruct`)
+- **Telegram Integration**: Native Telegram bot support via `aiogram` for direct RAG query access from chat.
 
 ### Frontend Stack
 - **Technologies**: Vanilla HTML, CSS, JavaScript
@@ -49,13 +50,18 @@ RAG/
    ```
 
 2. **Configure Environment Variables:**
-   Ensure you have a `.env` file in the root directory and add your keys (e.g., `OPENROUTER_API_KEY`).
+   Ensure you have a `.env` file in the root directory and add your keys, for example:
+   ```env
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+   ```
+   If `TELEGRAM_BOT_TOKEN` is set, the Telegram bot will start automatically with the backend.
 
 3. **Run the FastAPI Server:**
    ```bash
    python API/main.py
    ```
-   The API will be available at `http://localhost:8000`.
+   The API will be available at `http://localhost:8200`.
 
 ### Frontend Setup
 
@@ -69,6 +75,14 @@ python -m http.server 8001
 ```
 
 Navigate to `http://localhost:8001` in your browser. The UI will automatically connect to your running FastAPI backend. Look for the green dot in the sidebar to confirm the system is online!
+
+## Telegram Integration
+
+The RAG backend can also serve queries directly from Telegram. When `TELEGRAM_BOT_TOKEN` is configured in `.env`, the app starts an `aiogram` bot that listens for text messages and forwards them through the same RAG pipeline.
+
+- Send `/start` to begin a new chat session.
+- Type any question to receive a RAG-augmented answer in Telegram.
+- The bot runs in the background while the FastAPI server is running.
 
 ## API Endpoints
 
