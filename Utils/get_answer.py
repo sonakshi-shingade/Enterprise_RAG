@@ -7,6 +7,7 @@ from Services.embedding_service import (
     EmbeddingService,
 )
 from Services.llm import LLMService
+from Services.conversational_history import conversation_history
 
 
 # ---------------------------------------------------
@@ -397,6 +398,11 @@ say:
                 logger.info(
                     "Returning answer from semantic cache."
                 )
+                try:
+                    conversation_history.add_user_message(query, metadata={"top_k": top_k, "cache": True})
+                    conversation_history.add_assistant_message(cached_answer, metadata={"cached": True})
+                except Exception:
+                    pass
                 return cached_answer
 
             # ---------------------------------------------------
@@ -432,6 +438,13 @@ say:
                     user_input=query,
                 )
             )
+
+            # Log conversation
+            try:
+                conversation_history.add_user_message(query, metadata={"top_k": top_k, "cache": False})
+                conversation_history.add_assistant_message(response, metadata={"cached": False})
+            except Exception:
+                pass
 
             self._save_answer_cache(
                 query=query,

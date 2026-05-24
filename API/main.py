@@ -8,7 +8,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-
 # ---------------------------------------------------
 # Environment Variables
 # ---------------------------------------------------
@@ -19,27 +18,19 @@ load_dotenv()
 # Project Root Path Setup
 # ---------------------------------------------------
 # Add project root to PYTHONPATH
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
+from frontend.TelegramBot import telegram_bot
 
 # ---------------------------------------------------
 # Logging Configuration
 # ---------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format=(
-        "%(asctime)s | "
-        "%(levelname)s | "
-        "%(name)s | "
-        "%(message)s"
-    ),
+    format=("%(asctime)s | " "%(levelname)s | " "%(name)s | " "%(message)s"),
 )
 
 logger = logging.getLogger(__name__)
@@ -70,25 +61,37 @@ async def lifespan(app: FastAPI):
     Application startup and shutdown events.
     """
 
-    # ---------------- Startup ----------------
-    logger.info(
-        "Starting RAG Application..."
-    )
+    try:
+        logger.info("Starting RAG Application...")
 
-    logger.info(
-        "Application startup completed."
-    )
+        # Initialize Telegram bot in the background
+        # ---------------- Startup ----------------
+        app.state.telegram_bot_task = await telegram_bot.start_telegram_bot()
+        if app.state.telegram_bot_task is None:
+            logger.warning("Telegram bot was not started")
 
-    yield
+        logger.info("Application startup completed.")
 
-    # ---------------- Shutdown ----------------
-    logger.info(
-        "Shutting down RAG Application..."
-    )
+        logger.info("Starting RAG Application...")
 
-    logger.info(
-        "Application shutdown completed."
-    )
+        logger.info("Application startup completed.")
+
+        yield
+
+        # ---------------- Shutdown ----------------
+        logger.info("Shutting down RAG Application...")
+
+        logger.info("Application shutdown completed.")
+
+    except Exception as e:
+        logger.exception(f"Error during application startup: {e}")
+        raise e
+
+    finally:
+        if getattr(app.state, "telegram_bot_task", None) is not None:
+            await telegram_bot.stop_telegram_bot(app.state.telegram_bot_task)
+
+        logger.info("Shutting down RAG Application...")
 
 
 # ---------------------------------------------------
@@ -138,14 +141,10 @@ async def root():
     Root endpoint.
     """
 
-    logger.info(
-        "Root endpoint called."
-    )
+    logger.info("Root endpoint called.")
 
     return {
-        "message": (
-            "Enterprise RAG API is running successfully."
-        ),
+        "message": ("Enterprise RAG API is running successfully."),
         "version": "1.0.0",
         "status": "healthy",
     }
@@ -160,9 +159,7 @@ async def health_check():
     Global application health check.
     """
 
-    logger.info(
-        "Global health check called."
-    )
+    logger.info("Global health check called.")
 
     return {
         "status": "healthy",
@@ -175,15 +172,13 @@ async def health_check():
 # ---------------------------------------------------
 if __name__ == "__main__":
 
-    logger.info(
-        "Starting Uvicorn server..."
-    )
+    logger.info("Starting Uvicorn server...")
 
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,  # Disable in production
-        workers=1,    # Increase in production
+        port=8200,
+        reload=False,  # Disable in production
+        workers=1,  # Increase in production
         log_level="info",
     )
